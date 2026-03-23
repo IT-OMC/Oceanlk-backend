@@ -1,34 +1,54 @@
-# Optimized runtime-only Dockerfile for Spring Boot
-# Using eclipse-temurin for better production support and security
-FROM eclipse-temurin:21-jre-alpine
+# ============ BUILD STAGE ============
+# Multi-stage build to reduce final image size
+FROM eclipse-temurin:17-jdk-alpine AS builder
+WORKDIR /app
+
+# Copy pom.xml and download dependencies (layer caching)
+COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+# Copy source code
+COPY src ./src
+
+# Build the application
+RUN mvn clean package -DskipTests -q
+
+# ============ RUNTIME STAGE ============
+FROM eclipse-temurin:17-jre-alpine
+
+# Set working directory
 WORKDIR /app
 
 # Create non-root user for security
 RUN addgroup -S spring && adduser -S spring -G spring
 
-# Copy the pre-built JAR with correct ownership (no root-owned files)
-COPY --chown=spring:spring *.jar app.jar
+# Copy the built JAR from builder stage
+COPY --from=builder --chown=spring:spring /app/target/*.jar app.jar
 
+# Switch to non-root user
 USER spring:spring
 
-# Expose application port (actuator is on 8081 via management.server.port, not exposed)
+# Set default port for GCP Cloud Run (can be overridden via PORT env var)
+ENV PORT=8080 \
+    SERVER_PORT=8080
+
+# Expose port (for local development; Cloud Run will use PORT env var)
 EXPOSE 8080
 
-# Health check targets the internal management port (127.0.0.1:8081 in prod profile)
-# Falls back to 8080 for local dev where management.server.port is not set
+# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-  CMD wget -q --spider http://localhost:8081/actuator/health \
-      || wget -q --spider http://localhost:8080/actuator/health \
-      || exit 1
+  CMD wget -q --spider http://localhost:${PORT}/actuator/health || exit 1
 
-# Hardened JVM flags:
-# -Djava.security.egd         : Fast secure random (avoids /dev/random blocking)
-# -XX:+UseContainerSupport    : Respect Docker CPU/memory cgroup limits
-# -XX:MaxRAMPercentage=75.0   : Use 75% of container memory for heap
-# -XX:+ExitOnOutOfMemoryError : Crash fast on OOM rather than stalling
+# Optimized JVM configuration for GCP Cloud Run:
+# -Djava.security.egd              : Faster secure random generation
+# -XX:+UseContainerSupport         : Respect cgroup limits
+# -XX:MaxRAMPercentage=75.0        : Use 75% of available memory for heap
+# -XX:+ExitOnOutOfMemoryError      : Fail fast on OOM
+# -Dserver.port=${PORT}            : Dynamic port configuration for Cloud Run
 ENTRYPOINT ["java", \
   "-Djava.security.egd=file:/dev/./urandom", \
   "-XX:+UseContainerSupport", \
   "-XX:MaxRAMPercentage=75.0", \
   "-XX:+ExitOnOutOfMemoryError", \
+  "-Dserver.port=${PORT}", \
   "-jar", "app.jar"]
