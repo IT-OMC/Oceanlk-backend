@@ -44,11 +44,12 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
 # -XX:+UseContainerSupport         : Respect cgroup limits
 # -XX:MaxRAMPercentage=75.0        : Use 75% of available memory for heap
 # -XX:+ExitOnOutOfMemoryError      : Fail fast on OOM
-# -Dserver.port=${PORT}            : Dynamic port configuration for Cloud Run
+# -Dspring.profiles.active=cloud-run : Use Cloud Run-optimized configuration
+# Application will listen on $PORT from Cloud Run environment (defaults to 8080)
 ENTRYPOINT ["java", \
   "-Djava.security.egd=file:/dev/./urandom", \
   "-XX:+UseContainerSupport", \
   "-XX:MaxRAMPercentage=75.0", \
   "-XX:+ExitOnOutOfMemoryError", \
-  "-Dserver.port=${PORT}", \
+  "-Dspring.profiles.active=cloud-run", \
   "-jar", "app.jar"]
