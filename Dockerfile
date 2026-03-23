@@ -33,7 +33,7 @@ ENV PORT=8080 \
     SERVER_PORT=8080
 
 # Expose port (for local development; Cloud Run will use PORT env var)
-EXPOSE 8080
+EXPOSE 8081
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
