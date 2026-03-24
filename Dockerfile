@@ -10,7 +10,7 @@ RUN addgroup -S spring && adduser -S spring -G spring
 COPY --chown=spring:spring *.jar app.jar
 
 USER spring:spring
-
+ 
 # Expose application port (actuator is on 8081 via management.server.port, not exposed)
 EXPOSE 8080
 
