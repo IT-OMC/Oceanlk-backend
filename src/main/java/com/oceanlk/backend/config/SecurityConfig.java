@@ -170,7 +170,12 @@ public class SecurityConfig {
                 // Get allowed origins from environment variable
                 String allowedOriginsEnv = System.getenv("CORS_ALLOWED_ORIGINS");
                 if (allowedOriginsEnv != null && !allowedOriginsEnv.isEmpty()) {
-                        configuration.setAllowedOrigins(Arrays.asList(allowedOriginsEnv.split(",")));
+                        // If environment variable is "*", allow all origins
+                        if ("*".equals(allowedOriginsEnv)) {
+                                configuration.addAllowedOriginPattern("*");
+                        } else {
+                                configuration.setAllowedOrigins(Arrays.asList(allowedOriginsEnv.split(",")));
+                        }
                 } else {
                         // Default for development (safe fallbacks)
                         configuration.setAllowedOrigins(
@@ -179,13 +184,13 @@ public class SecurityConfig {
                                                         "https://test.ocean.lk"));
                 }
 
-                configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-                configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With",
-                                "Accept",
-                                "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
+                configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
+                configuration.setAllowedHeaders(Arrays.asList("*"));
                 configuration
                                 .setExposedHeaders(Arrays.asList("Access-Control-Allow-Origin",
-                                                "Access-Control-Allow-Credentials"));
+                                                "Access-Control-Allow-Credentials",
+                                                "Access-Control-Allow-Methods",
+                                                "Access-Control-Allow-Headers"));
                 configuration.setAllowCredentials(true);
                 configuration.setMaxAge(3600L);
 
