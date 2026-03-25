@@ -2,6 +2,7 @@ package com.oceanlk.backend.config;
 
 import com.oceanlk.backend.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -20,6 +21,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebSecurity
@@ -29,6 +31,9 @@ public class SecurityConfig {
 
         private final JwtAuthenticationFilter jwtAuthFilter;
         private final com.oceanlk.backend.filter.RateLimitFilter rateLimitFilter;
+
+        @Value("${cors.allowed.origins:https://ocean.lk,https://www.ocean.lk,https://oceanlk.web.app}")
+        private String corsAllowedOrigins;
 
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -167,17 +172,14 @@ public class SecurityConfig {
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration configuration = new CorsConfiguration();
 
-                // Get allowed origins from environment variable
-                String allowedOriginsEnv = System.getenv("CORS_ALLOWED_ORIGINS");
-                if (allowedOriginsEnv != null && !allowedOriginsEnv.isEmpty()) {
-                        configuration.setAllowedOrigins(Arrays.asList(allowedOriginsEnv.split(",")));
-                } else {
-                        // Default for development (safe fallbacks)
-                        configuration.setAllowedOrigins(
-                                        Arrays.asList("http://localhost:5173", "http://localhost:4173",
-                                                        "https://ocean.lk", "https://www.ocean.lk",
-                                                        "https://test.ocean.lk"));
+                // Parse allowed origins from property (comma-separated)
+                String[] allowedOrigins = corsAllowedOrigins
+                        .split(",");
+                // Trim whitespace from each origin
+                for (int i = 0; i < allowedOrigins.length; i++) {
+                        allowedOrigins[i] = allowedOrigins[i].trim();
                 }
+                configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
 
                 configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
                 configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With",
