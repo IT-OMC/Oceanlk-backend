@@ -85,16 +85,16 @@ public class DataInitializer implements CommandLineRunner {
                         List<Partner> partners = new ArrayList<>();
                         partners.add(new Partner("World Shipping Council",
                                         "https://images.unsplash.com/photo-1566938096894-0ba9bd747306?q=80&w=200",
-                                        "https://www.worldshipping.org"));
+                                        "https://www.worldshipping.org", null));
                         partners.add(new Partner("Int. Chamber of Shipping",
                                         "https://images.unsplash.com/photo-1524522173746-f628baad3644?q=80&w=200",
-                                        "https://www.ics-shipping.org"));
+                                        "https://www.ics-shipping.org", null));
                         partners.add(new Partner("BIMCO Member",
                                         "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=200",
-                                        "https://www.bimco.org"));
+                                        "https://www.bimco.org", null));
                         partners.add(new Partner("Marine Environment Pro.",
                                         "https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=200",
-                                        "https://www.mepc.org"));
+                                        "https://www.mepc.org", null));
                         partnerRepository.saveAll(partners);
                         log.info("Seeded {} partners", partners.size());
                 } else {

@@ -47,6 +47,7 @@ public class PartnerService {
         partner.setLogoUrl(partnerDetails.getLogoUrl());
         partner.setWebsiteUrl(partnerDetails.getWebsiteUrl());
         partner.setCategory(partnerDetails.getCategory());
+        partner.setCompanyId(partnerDetails.getCompanyId());
         partner.setDisplayOrder(partnerDetails.getDisplayOrder());
 
         return partnerRepository.save(partner);
