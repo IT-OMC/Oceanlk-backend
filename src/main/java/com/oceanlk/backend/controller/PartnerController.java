@@ -79,6 +79,7 @@ public class PartnerController {
                                                 existing.setWebsiteUrl(partner.getWebsiteUrl());
                                                 existing.setCategory(partner.getCategory());
                                                 existing.setDisplayOrder(partner.getDisplayOrder());
+                                                existing.setCompanyId(partner.getCompanyId());
                                                 Partner savedPartner = repository.save(existing);
 
                                                 // Record in history for Super Admin

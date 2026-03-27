@@ -18,13 +18,15 @@ public class Partner {
     private String logoUrl;
     private String websiteUrl;
     private String category; // "PARTNER", "MEMBERSHIP"
+    private String companyId; 
     private Integer displayOrder;
 
-    public Partner(String name, String logoUrl, String websiteUrl) {
+    public Partner(String name, String logoUrl, String websiteUrl, String companyId) {
         this.name = name;
         this.logoUrl = logoUrl;
         this.websiteUrl = websiteUrl;
         this.category = "PARTNER"; // Default
+        this.companyId = companyId;
         this.displayOrder = 0;
     }
 }
